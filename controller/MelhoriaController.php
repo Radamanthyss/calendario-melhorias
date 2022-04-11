@@ -1,46 +1,45 @@
 <?php
-require_once '../dao/Area.php';
-require_once '../model/AreaModel.php';
+require_once '../dao/Melhoria.php';
+require_once '../model/MelhoriaModel.php';
 
 use DAO\Melhoria;
 use MODEL\MelhoriaModel;
 
 
-if (isset($_POST["campoID"]) && $_POST["campoID"] > 0) {
-    $idF = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'campoID', FILTER_SANITIZE_NUMBER_INT)));
-} else {
-    $idF = 0;
-}
 
-if (isset($_POST["descricao"])) {
-    $descricao = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_STRING)));
-}
+$id = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'campoID', FILTER_SANITIZE_NUMBER_INT)));
+$area = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'area', FILTER_SANITIZE_NUMBER_INT)));
+$descricao = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_STRING)));
+$prazo_acordado = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'prazo_acordado', FILTER_SANITIZE_STRING)));
+$prazo_legal = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'prazo_legal', FILTER_SANITIZE_STRING)));
+$gravidade = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'gravidade', FILTER_SANITIZE_NUMBER_INT)));
+$urgencia = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'urgencia', FILTER_SANITIZE_NUMBER_INT)));
+$tendencia = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'tendencia', FILTER_SANITIZE_NUMBER_INT)));
 
-if (!$_GET["acao"] && $idF == 0) {
-    $area = new AreaModel();
-    $area->setAreaModelDescricao($descricao);
-    Area::getInstance()->salvarArea($area);
-    header("location: ../index.php?path=areas");
-}
 
-if (!$_GET["acao"] && $idF != 0) {
-    try {
-        $area = new AreaModel();
-        $area->setAreaModelId($idF);
-        $area->setAreaModelDescricao($descricao);
-        Area::getInstance()->atualizarArea($area);
-        header("location: ../index.php?path=areas");
-    } catch (PDOException $erro) {
-        echo "Erro: " . $erro->getMessage();
+if ($_GET["acao"] == "save") {
+    $melhoria = new MelhoriaModel();
+    if ($id > 0) {
+        $melhoria->setId($id);
     }
+    $melhoria->setArea($area);
+    $melhoria->setDescricao($descricao);
+    $melhoria->setPrazo_acordado($prazo_acordado);
+    $melhoria->setPrazo_legal($prazo_legal);
+    $melhoria->setGravidade($gravidade);
+    $melhoria->setUrgencia($urgencia);
+    $melhoria->setTendencia($tendencia);
+
+    Melhoria::getInstance()->salvarAtualizarMelhoria($melhoria);
+    //header("location: ../index.php?path=tarefas");
 }
 
 if ($_GET["acao"] == "del" && $_GET['id'] > 0) {
     try {
-        $area = new AreaModel();
-        $area->setAreaModelId($_GET['id']);
-        Area::getInstance()->removerArea($area);
-        header("location: ../index.php?path=areas");
+        $melhoria = new MelhoriaModel();
+        $melhoria->setId($_GET['id']);
+        Melhoria::getInstance()->removerMelhoria($melhoria);
+        header("location: ../index.php?path=tarefas");
     } catch (PDOException $erro) {
         echo "Erro: " . $erro->getMessage();
     }

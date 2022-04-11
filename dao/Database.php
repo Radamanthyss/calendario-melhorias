@@ -3,6 +3,7 @@
 namespace DAO;
 
 use MODEL\AreaModel;
+use MODEL\MelhoriaModel;
 
 class Database
 {
@@ -200,6 +201,52 @@ class Database
         $dbst = $this->db->prepare(" DELETE FROM Area WHERE id = :id");
         $dbst->bindValue(':id', $obj->getAreaModelId(), \PDO::PARAM_INT);
         $this->execute($dbst);
+    }
+
+    public function salvarAtualizarMelhoria(MelhoriaModel $obj)
+    {
+        
+        if (!$obj->getGravidade() && !$obj->getUrgencia() && !$obj->getTendencia()) {
+            echo ("É necessario informar PELO MENOS um dos itens do GUT (Gravidade, Urgência, Tendência)");
+        } else {
+            if ($obj->getId() > 0) {
+                $dbst = $this->db->prepare("UPDATE Melhoria SET tarefa = :tarefa, descricao = :descricao, 
+                prazo_legal = :prazo_legal, prazo_acordado = :prazo_acordado, area = :area, tendencia = :tendencia,
+                urgencia = :urgencia, gravidade = :gravidade, demanda_legal = :demanda_legal
+                WHERE id = :id");
+                $dbst->bindValue(':id', $obj->getId(), \PDO::PARAM_INT);
+                echo 'fez update';
+            } else {
+                $dbst = $this->db->prepare("INSERT INTO Melhoria (tarefa, descricao,prazo_legal, prazo_acordado,
+                area, tendencia, urgencia, gravidade, demanda_legal) VALUES (:tarefa, :descricao, :prazo_legal, :prazo_acordado,
+                :area, :tendencia, :urgencia, :gravidade, :demanda_legal)");
+                echo 'fez insert';
+            }
+            $dbst->bindValue(':tarefa', $obj->tarefa, \PDO::PARAM_STR);
+            $dbst->bindValue(':descricao', $obj->descricao, \PDO::PARAM_STR);
+            $dbst->bindValue(':prazo_legal', $obj->prazo_legal, \PDO::PARAM_STR);
+            $dbst->bindValue(':prazo_acordado', $obj->prazo_acordado, \PDO::PARAM_STR);
+            $dbst->bindValue(':area', $obj->area, \PDO::PARAM_INT);
+            $dbst->bindValue(':tendencia', $obj->tendencia, \PDO::PARAM_INT);
+            $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_INT);
+            $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_INT);
+            $dbst->bindValue(':demanda_legal', $obj->demanda_legal, \PDO::PARAM_BOOL);
+
+            print_r($dbst->execute());
+        }
+    }
+
+    public function removerMelhoria(MelhoriaModel $obj)
+    {
+        $dbst = $this->db->prepare(" DELETE FROM " . static::TABLE . " WHERE id = :id");
+        $dbst->bindValue(':id', $obj->getId(), \PDO::PARAM_INT);
+        $this->execute($dbst);
+    }
+
+    public function retornaDescArea($id){
+        $dbst = $this->db->prepare(" SELECT descricao FROM Area WHERE id = :id");
+        $dbst->bindValue(':id', $id, \PDO::PARAM_INT);
+        return $this->execute($dbst);
     }
 
     public function __destruct()
