@@ -227,11 +227,33 @@ class Database
             }
             //checaDataPrazos retorna true se as datas dos prazos informados correspoderem a regra de estarem dentro dos dias atuais!e não no passado.
             if ($this->checaDataPrazos($obj)) { //O prazo acordado e o prazo legal devem estar entre a data atual e o último dia do ano corrente.
-                $dbst->bindValue(':prazo_legal', $obj->prazo_legal, \PDO::PARAM_NULL);
+
+                if ($obj->prazo_legal != "") {
+                    $dbst->bindValue(':prazo_legal', $obj->prazo_legal, \PDO::PARAM_STR);
+                } else {
+                    $dbst->bindValue(':prazo_legal', $obj->prazo_legal, \PDO::PARAM_NULL);
+                }
+
                 $dbst->bindValue(':prazo_acordado', $obj->prazo_acordado, \PDO::PARAM_STR);
-                $dbst->bindValue(':tendencia', $obj->tendencia, \PDO::PARAM_NULL);
-                $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_NULL);
-                $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_NULL);
+
+                if ($obj->tendencia != "") {
+                    $dbst->bindValue(':tendencia', $obj->tendencia, \PDO::PARAM_INT);
+                } else {
+                    $dbst->bindValue(':tendencia', $obj->tendencia, \PDO::PARAM_NULL);
+                }
+
+                if ($obj->urgencia != "") {
+                    $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_INT);
+                } else {
+                    $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_NULL);
+                }
+
+                if ($obj->gravidade != "") {
+                    $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_INT);
+                } else {
+                    $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_NULL);
+                }
+
                 $dbst->bindValue(':tarefa', $obj->descricao, \PDO::PARAM_STR);
                 $dbst->bindValue(':descricao', $obj->descricao, \PDO::PARAM_STR);
                 $dbst->bindValue(':area', $obj->area, \PDO::PARAM_INT);
@@ -278,6 +300,27 @@ class Database
     public function retornaDescArea($id)
     {
         $dbst = $this->db->prepare(" SELECT descricao FROM Area WHERE id = :id");
+        $dbst->bindValue(':id', $id, \PDO::PARAM_INT);
+        return $this->execute($dbst);
+    }
+
+    public function retornaDescGravidade($id)
+    {
+        $dbst = $this->db->prepare(" SELECT descricao FROM config.Gravidade WHERE id = :id");
+        $dbst->bindValue(':id', $id, \PDO::PARAM_INT);
+        return $this->execute($dbst);
+    }
+
+    public function retornaDescUrgencia($id)
+    {
+        $dbst = $this->db->prepare(" SELECT descricao FROM config.Urgencia WHERE id = :id");
+        $dbst->bindValue(':id', $id, \PDO::PARAM_INT);
+        return $this->execute($dbst);
+    }
+
+    public function retornaDescTendencia($id)
+    {
+        $dbst = $this->db->prepare(" SELECT descricao FROM config.Tendencia WHERE id = :id");
         $dbst->bindValue(':id', $id, \PDO::PARAM_INT);
         return $this->execute($dbst);
     }

@@ -7,10 +7,10 @@ use DAO\Gravidade;
 use DAO\Tendencia;
 
 
-$areas = Area::getInstance()->order('descricao')->getAll();
-$gravidades = Gravidade::getInstance()->order('descricao')->getAll();
-$urgencias = Urgencia::getInstance()->order('descricao')->getAll();
-$tendencias = Tendencia::getInstance()->order('descricao')->getAll();
+$areas = Area::getInstance()->order('id')->getAll();
+$gravidades = Gravidade::getInstance()->order('id')->getAll();
+$urgencias = Urgencia::getInstance()->order('id')->getAll();
+$tendencias = Tendencia::getInstance()->order('id')->getAll();
 $melhorias = Melhoria::getInstance()->order('id')->getAll();
 $meses = [];
 
@@ -49,11 +49,11 @@ for ($m = 1; $m <= 12; $m++) {
     <div class="form-row">
       <div class="form-group col-sm-12 col-md-5">
         <label for="prazo_acordado">Prazo Acordado</label>
-        <input type="date" class="form-control" id="prazo_acordado" name="prazo_acordado" required>
+        <input type="text" class="form-control" id="prazo_acordado" name="prazo_acordado" required>
       </div>
       <div class="form-group col-sm-12 col-md-5">
         <label for="prazo_legal">Prazo Legal</label>
-        <input type="date" class="form-control" id="prazo_legal" name="prazo_legal" >
+        <input type="text" class="form-control" id="prazo_legal" name="prazo_legal">
       </div>
     </div>
     <div class="form-row">
@@ -106,16 +106,55 @@ for ($m = 1; $m <= 12; $m++) {
       <th>Descrição</th>
       <th>Àrea</th>
       <th>Prazo Acordado</th>
+      <th>Prazo Legal</th>
+      <th>Gravidade</th>
+      <th>Urgência</th>
+      <th>Tendência</th>
       <th>Opções</th>
     </tr>
     <?php
     // Bloco que realiza a geração da tabela dos registros de àreas
     try {
       foreach ($melhorias as $rs) {
+
+        $descGrav = Melhoria::getInstance()->retornaDescGravidade($rs->gravidade);
+        $descUrge = Melhoria::getInstance()->retornaDescUrgencia($rs->urgencia);
+        $descTend = Melhoria::getInstance()->retornaDescTendencia($rs->tendencia);
+
+        if ($descGrav == "") {
+          $descGrav = "Não informado";
+        } else {
+          $descGrav = Melhoria::getInstance()->retornaDescGravidade($rs->gravidade)->descricao;
+        }
+
+        if ($descUrge == "") {
+          $descUrge = "Não informado";
+        } else {
+          $descUrge = Melhoria::getInstance()->retornaDescUrgencia($rs->urgencia)->descricao;
+        }
+
+        if ($descTend == "") {
+          $descTend = "Não informado";
+        } else {
+          $descTend = Melhoria::getInstance()->retornaDescTendencia($rs->tendencia)->descricao;
+        }
+
+        $pa = date("d/m/Y", strtotime($rs->prazo_acordado));
+
+        if ($rs->prazo_legal == "") {
+          $pl = "Não Informado";
+        } else {
+          $pl = date("d/m/Y", strtotime($rs->prazo_legal));
+        }
+
+
         echo "<tr>";
-        echo "<td id='colID'>" . $rs->id . "</td><td id='colDesc" . $rs->id . "'>" . $rs->descricao . "</td>"
-          . "<td id='colArea'> " . Melhoria::getInstance()->retornaDescArea($rs->area)->descricao . "</td><td id=''>" . $rs->prazo_acordado . "</td>"
-          . "<td><center><button type='button' onclick='alteracao(" . $rs->id . ")' class='btn btn-secondary'> Alterar </button>"
+        echo "<td>" . $rs->id . "</td><td id='colDesc" . $rs->id . "' >" . $rs->descricao . "</td>"
+          . "<td> " . Melhoria::getInstance()->retornaDescArea($rs->area)->descricao . "</td><td id='colPa" . $rs->id . "'>" . $pa . "</td>"
+          . "<td id='colPl" . $rs->id . "'> " . $pl . "</td><td id='colGrav" . $rs->id . "'>" . $descGrav . "</td>"
+          . "<td id='colUrge" . $rs->id . "'>" . $descUrge . "</td>"
+          . "<td id='colTend" . $rs->id . "'>" . $descTend . "</td>"
+          . "<td><center><button type='button' onclick='alteracao(" . $rs->id . "," . $rs->area . ")' class='btn btn-secondary'> Alterar </button>"
           . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
           . "<a class='btn-danger' href=\"../controller/MelhoriaController.php?acao=del&id=" . $rs->id . "\">[Excluir]</a></center></td>";
         echo "</tr>";
@@ -127,8 +166,15 @@ for ($m = 1; $m <= 12; $m++) {
   </table>
 </div>
 <script type="text/javascript">
-  function alteracao(id) {
+  function alteracao(id, area) {
     document.getElementById("campoID").value = id;
     document.getElementById("descricao").value = document.getElementById("colDesc" + id).textContent;
+    document.getElementById("prazo_acordado").value = document.getElementById("colPa" + id).textContent;
+    document.getElementById("area").selectedIndex = area;
+    document.getElementById("prazo_legal").value = document.getElementById("colPl" + id).textContent == " Não Informado" ? "" : document.getElementById("colPl" + id).textContent;
+    document.getElementById("gravidade").selectedIndex = document.getElementById("colGrav" + id).textContent == "Não Informado" ? "" : document.getElementById("colGrav" + id).textContent;
+    document.getElementById("urgencia").selectedIndex = document.getElementById("colUrge" + id).textContent == "Não Informado" ? "" : document.getElementById("colUrge" + id).textContent;
+    document.getElementById("tendencia").selectedIndex = document.getElementById("colTend" + id).textContent == "Não Informado" ? "" : document.getElementById("colTend" + id).textContent;
+
   }
 </script>
