@@ -3,7 +3,7 @@
 namespace DAO;
 
 require_once 'Database.php';
-require_once './model/MelhoriaModel.php';
+require_once '../model/MelhoriaModel.php';
 
 use MODEL\MelhoriaModel;
 
