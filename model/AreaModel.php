@@ -11,22 +11,22 @@ class AreaModel
     {
     }
 
-    public function getAreaModelId()
+    public function getId()
     {
         return $this->id;
     }
 
-    public function setAreaModelId($id)
+    public function setId($id)
     {
         $this->id = $id;
     }
 
-    public function getAreaModelDescricao()
+    public function getDescricao()
     {
         return $this->descricao;
     }
 
-    public function setAreaModelDescricao($desc)
+    public function setDescricao($desc)
     {
         $this->descricao = $desc;
     }
