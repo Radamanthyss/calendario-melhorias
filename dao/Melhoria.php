@@ -62,8 +62,10 @@ class Melhoria extends Database
 
                 if ($obj->urgencia != "") {
                     $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_INT);
-                } else {
-                    $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_NULL);
+                } else {// Decidi forçar o set da variavel urgencia para resolver o problema de todas as Tarefas aparecerem na Agenda
+                    //assim, juntamente com meus ajustes na view agenda, todas as tarefas serão exibidas, até porque, como alguem
+                    //poderia cadastrar uma tarefa sem nem sequer informar um nivel de urgencia, não é msm? :D
+                    $dbst->bindValue(':urgencia', 1, \PDO::PARAM_INT);
                 }
 
                 if ($obj->gravidade != "") {
