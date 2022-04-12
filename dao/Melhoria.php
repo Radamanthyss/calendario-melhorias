@@ -3,7 +3,6 @@
 namespace DAO;
 
 require_once 'Database.php';
-require_once '../model/MelhoriaModel.php';
 
 use MODEL\MelhoriaModel;
 
@@ -73,7 +72,6 @@ class Melhoria extends Database
                     $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_NULL);
                 }
 
-                echo '$obj->demanda_legal= ' . PHP_EOL . $obj->demanda_legal;
                 $dbst->bindValue(':tarefa', $obj->descricao, \PDO::PARAM_STR);
                 $dbst->bindValue(':descricao', $obj->descricao, \PDO::PARAM_STR);
                 $dbst->bindValue(':area', $obj->area, \PDO::PARAM_INT);
