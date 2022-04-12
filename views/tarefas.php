@@ -12,14 +12,6 @@ $gravidades = Gravidade::getInstance()->order('id')->getAll();
 $urgencias = Urgencia::getInstance()->order('id')->getAll();
 $tendencias = Tendencia::getInstance()->order('id')->getAll();
 $melhorias = Melhoria::getInstance()->order('id')->getAll();
-$meses = [];
-
-for ($m = 1; $m <= 12; $m++) {
-  $meses[] = (object)[
-    'id'         => $m,
-    'descricao'  => date('F', mktime(0, 0, 0, $m)),
-  ];
-}
 
 ?>
 <div class="container" id="cadastroTarefa">
@@ -42,18 +34,18 @@ for ($m = 1; $m <= 12; $m++) {
       <input type="hidden" id="campoID" name="campoID" />
       <div class="form-group col-sm-12">
         <label for="descricao">Descrição</label>
-        <input type="text" class="form-control" name="descricao" id="descricao" required />
+        <textarea class="form-control" name="descricao" id="descricao" required></textarea>
         <small id="areaHelp" class="form-text text-muted">Descrição do negócio da tarefa.</small>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group col-sm-12 col-md-5">
         <label for="prazo_acordado">Prazo Acordado</label>
-        <input type="text" class="form-control" id="prazo_acordado" name="prazo_acordado" required>
+        <input type="date" class="form-control" id="prazo_acordado" name="prazo_acordado" required>
       </div>
       <div class="form-group col-sm-12 col-md-5">
         <label for="prazo_legal">Prazo Legal</label>
-        <input type="text" class="form-control" id="prazo_legal" name="prazo_legal">
+        <input type="date" class="form-control" id="prazo_legal" name="prazo_legal">
       </div>
     </div>
     <div class="form-row">
@@ -89,8 +81,9 @@ for ($m = 1; $m <= 12; $m++) {
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group col-md-12">
-        <span id="validacaoMsg"></span>
+      <div class="form-group col-sm-6 col-md-8">
+        <label for="demanda_legal">Demanda Legal</label>
+        <input type="checkbox" class="form-control" id="demanda_legal" name="demanda_legal">
       </div>
     </div>
     <div class="form-row">
@@ -110,6 +103,7 @@ for ($m = 1; $m <= 12; $m++) {
       <th>Gravidade</th>
       <th>Urgência</th>
       <th>Tendência</th>
+      <th>Demanda Legal</th>
       <th>Opções</th>
     </tr>
     <?php
@@ -147,15 +141,20 @@ for ($m = 1; $m <= 12; $m++) {
           $pl = date("d/m/Y", strtotime($rs->prazo_legal));
         }
 
+        if ($rs->demanda_legal == 1) {
+          $demanda = 'SIM';
+        } else {
+          $demanda = 'NÃO';
+        }
 
         echo "<tr>";
         echo "<td>" . $rs->id . "</td><td id='colDesc" . $rs->id . "' >" . $rs->descricao . "</td>"
           . "<td> " . Melhoria::getInstance()->retornaDescArea($rs->area)->descricao . "</td><td id='colPa" . $rs->id . "'>" . $pa . "</td>"
-          . "<td id='colPl" . $rs->id . "'> " . $pl . "</td><td id='colGrav" . $rs->id . "'>" . $descGrav . "</td>"
-          . "<td id='colUrge" . $rs->id . "'>" . $descUrge . "</td>"
-          . "<td id='colTend" . $rs->id . "'>" . $descTend . "</td>"
+          . "<td id='colPl" . $rs->id . "'> " . $pl . "</td><td><input type='hidden' id='colGrav" . $rs->id . "' value='" . $rs->gravidade . "' />" . $descGrav . "</td>"
+          . "<td><input type='hidden' id='colUrge" . $rs->id . "' value='" . $rs->urgencia . "' />" . $descUrge . "</td>"
+          . "<td><input type='hidden' id='colTend" . $rs->id . "' value='" . $rs->tendencia . "' />" . $descTend . "</td>"
+          . "<td id='colDema" . $rs->id . "'>" . $demanda . "</td>"
           . "<td><center><button type='button' onclick='alteracao(" . $rs->id . "," . $rs->area . ")' class='btn btn-secondary'> Alterar </button>"
-          . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
           . "<a class='btn-danger' href=\"../controller/MelhoriaController.php?acao=del&id=" . $rs->id . "\">[Excluir]</a></center></td>";
         echo "</tr>";
       }
@@ -167,14 +166,32 @@ for ($m = 1; $m <= 12; $m++) {
 </div>
 <script type="text/javascript">
   function alteracao(id, area) {
+    //declaração e atribuição de variaveis responsaveis por controlar os dados pra popular o form e possibilitar o update!
+    var tdPa = document.getElementById("colPa" + id).textContent;
+    var tdPl = document.getElementById("colPl" + id).textContent;
+    var tdGrav = document.getElementById("colGrav" + id).value;
+    var tdUrge = document.getElementById("colUrge" + id).value;
+    var tdTend = document.getElementById("colTend" + id).value;
+    var tdDema = document.getElementById("colDema" + id).textContent;
+
+
     document.getElementById("campoID").value = id;
     document.getElementById("descricao").value = document.getElementById("colDesc" + id).textContent;
-    document.getElementById("prazo_acordado").value = document.getElementById("colPa" + id).textContent;
+    document.getElementById("prazo_acordado").value = FormataStringData(tdPa);
     document.getElementById("area").selectedIndex = area;
-    document.getElementById("prazo_legal").value = document.getElementById("colPl" + id).textContent == " Não Informado" ? "" : document.getElementById("colPl" + id).textContent;
-    document.getElementById("gravidade").selectedIndex = document.getElementById("colGrav" + id).textContent == "Não Informado" ? "" : document.getElementById("colGrav" + id).textContent;
-    document.getElementById("urgencia").selectedIndex = document.getElementById("colUrge" + id).textContent == "Não Informado" ? "" : document.getElementById("colUrge" + id).textContent;
-    document.getElementById("tendencia").selectedIndex = document.getElementById("colTend" + id).textContent == "Não Informado" ? "" : document.getElementById("colTend" + id).textContent;
+    document.getElementById("prazo_legal").value = tdPl == " Não Informado" ? "" : FormataStringData(tdPl);
+    document.getElementById("gravidade").selectedIndex = tdGrav == "" ? "" : tdGrav;
+    document.getElementById("urgencia").selectedIndex = tdUrge == "" ? "" : tdUrge;
+    document.getElementById("tendencia").selectedIndex = tdTend == "" ? "" : tdTend;
+    document.getElementById("demanda_legal").checked = tdDema == "SIM" ? true : false;
+  }
 
+  function FormataStringData(data) {
+    var dia = data.split("/")[0];
+    var mes = data.split("/")[1];
+    var ano = data.split("/")[2];
+
+    return ano + '-' + ("0" + mes).slice(-2) + '-' + ("0" + dia).slice(-2);
+    // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
   }
 </script>

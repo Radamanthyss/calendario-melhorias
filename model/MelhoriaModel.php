@@ -7,7 +7,7 @@ class MelhoriaModel
     public $id;
     public $descricao;
     public $tarefa;
-    public $demanda_legal =false;
+    public $demanda_legal = false;
     public $prazo_acordado;
     public $prazo_legal;
     public $gravidade;

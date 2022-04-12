@@ -15,6 +15,7 @@ $prazo_legal = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'prazo_leg
 $gravidade = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'gravidade', FILTER_SANITIZE_NUMBER_INT)));
 $urgencia = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'urgencia', FILTER_SANITIZE_NUMBER_INT)));
 $tendencia = stripslashes(htmlspecialchars(filter_input(INPUT_POST, 'tendencia', FILTER_SANITIZE_NUMBER_INT)));
+$demanda_legal = $_POST['demanda_legal'];
 
 
 if ($_GET["acao"] == "save") {
@@ -30,6 +31,12 @@ if ($_GET["acao"] == "save") {
     $melhoria->setGravidade($gravidade);
     $melhoria->setUrgencia($urgencia);
     $melhoria->setTendencia($tendencia);
+    if ($demanda_legal != "") {
+        $melhoria->setDemanda_legal(true);
+    } else {
+        $melhoria->setDemanda_legal(false);
+    }
+
 
     Melhoria::getInstance()->salvarAtualizarMelhoria($melhoria);
     header("location: ../index.php?path=tarefas");

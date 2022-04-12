@@ -219,7 +219,6 @@ class Database
                 urgencia = :urgencia, gravidade = :gravidade, demanda_legal = :demanda_legal
                 WHERE id = :id");
                 $dbst->bindValue(':id', $obj->getId(), \PDO::PARAM_INT);
-                echo 'fez update';
             } else {
                 $dbst = $this->db->prepare("INSERT INTO Melhorias (tarefa, descricao,prazo_legal, prazo_acordado,
                 area, tendencia, urgencia, gravidade, demanda_legal) VALUES (:tarefa, :descricao, :prazo_legal, :prazo_acordado,
@@ -254,12 +253,15 @@ class Database
                     $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_NULL);
                 }
 
+                echo '$obj->demanda_legal= ' . PHP_EOL . $obj->demanda_legal;
                 $dbst->bindValue(':tarefa', $obj->descricao, \PDO::PARAM_STR);
                 $dbst->bindValue(':descricao', $obj->descricao, \PDO::PARAM_STR);
                 $dbst->bindValue(':area', $obj->area, \PDO::PARAM_INT);
                 $dbst->bindValue(':demanda_legal', $obj->demanda_legal, \PDO::PARAM_BOOL);
 
-                $dbst->execute();
+                if ($dbst->execute() === false) {
+                    echo "Deu pau ao executar o statement " . print_r($dbst->errorInfo());
+                };
             } else {
                 echo 'Não é possivel cadastrar estes Prazos, pois devem estar entre a data atual e o último dia do ano corrente!';
             }
