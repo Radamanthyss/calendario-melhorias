@@ -53,7 +53,7 @@ for ($m = 1; $m <= 12; $m++) {
       </div>
       <div class="form-group col-sm-12 col-md-5">
         <label for="prazo_legal">Prazo Legal</label>
-        <input type="date" class="form-control" id="prazo_legal" name="prazo_legal" required>
+        <input type="date" class="form-control" id="prazo_legal" name="prazo_legal" >
       </div>
     </div>
     <div class="form-row">

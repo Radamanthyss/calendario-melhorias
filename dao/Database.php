@@ -198,41 +198,49 @@ class Database
 
     public function removerArea(AreaModel $obj)
     {
-        $dbst = $this->db->prepare(" DELETE FROM Area WHERE id = :id");
-        $dbst->bindValue(':id', $obj->getAreaModelId(), \PDO::PARAM_INT);
-        $this->execute($dbst);
+        if (!$this->checaTarefaExistenteComArea($obj)) { //implementando a proteção para remoção de àreas ja com tarefas cadastradas.
+            $dbst = $this->db->prepare(" DELETE FROM Area WHERE id = :id");
+            $dbst->bindValue(':id', $obj->getAreaModelId(), \PDO::PARAM_INT);
+            $this->execute($dbst);
+        } else {
+            echo 'Impossível efetuar a remoção de uma àrea que possui tarefas cadastradas!';
+        }
     }
 
     public function salvarAtualizarMelhoria(MelhoriaModel $obj)
     {
-        
+
         if (!$obj->getGravidade() && !$obj->getUrgencia() && !$obj->getTendencia()) {
             echo ("É necessario informar PELO MENOS um dos itens do GUT (Gravidade, Urgência, Tendência)");
         } else {
             if ($obj->getId() > 0) {
-                $dbst = $this->db->prepare("UPDATE Melhoria SET tarefa = :tarefa, descricao = :descricao, 
+                $dbst = $this->db->prepare("UPDATE Melhorias SET tarefa = :tarefa, descricao = :descricao, 
                 prazo_legal = :prazo_legal, prazo_acordado = :prazo_acordado, area = :area, tendencia = :tendencia,
                 urgencia = :urgencia, gravidade = :gravidade, demanda_legal = :demanda_legal
                 WHERE id = :id");
                 $dbst->bindValue(':id', $obj->getId(), \PDO::PARAM_INT);
                 echo 'fez update';
             } else {
-                $dbst = $this->db->prepare("INSERT INTO Melhoria (tarefa, descricao,prazo_legal, prazo_acordado,
+                $dbst = $this->db->prepare("INSERT INTO Melhorias (tarefa, descricao,prazo_legal, prazo_acordado,
                 area, tendencia, urgencia, gravidade, demanda_legal) VALUES (:tarefa, :descricao, :prazo_legal, :prazo_acordado,
                 :area, :tendencia, :urgencia, :gravidade, :demanda_legal)");
-                echo 'fez insert';
             }
-            $dbst->bindValue(':tarefa', $obj->tarefa, \PDO::PARAM_STR);
-            $dbst->bindValue(':descricao', $obj->descricao, \PDO::PARAM_STR);
-            $dbst->bindValue(':prazo_legal', $obj->prazo_legal, \PDO::PARAM_STR);
-            $dbst->bindValue(':prazo_acordado', $obj->prazo_acordado, \PDO::PARAM_STR);
-            $dbst->bindValue(':area', $obj->area, \PDO::PARAM_INT);
-            $dbst->bindValue(':tendencia', $obj->tendencia, \PDO::PARAM_INT);
-            $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_INT);
-            $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_INT);
-            $dbst->bindValue(':demanda_legal', $obj->demanda_legal, \PDO::PARAM_BOOL);
+            //checaDataPrazos retorna true se as datas dos prazos informados correspoderem a regra de estarem dentro dos dias atuais!e não no passado.
+            if ($this->checaDataPrazos($obj)) { //O prazo acordado e o prazo legal devem estar entre a data atual e o último dia do ano corrente.
+                $dbst->bindValue(':prazo_legal', $obj->prazo_legal, \PDO::PARAM_NULL);
+                $dbst->bindValue(':prazo_acordado', $obj->prazo_acordado, \PDO::PARAM_STR);
+                $dbst->bindValue(':tendencia', $obj->tendencia, \PDO::PARAM_NULL);
+                $dbst->bindValue(':urgencia', $obj->urgencia, \PDO::PARAM_NULL);
+                $dbst->bindValue(':gravidade', $obj->gravidade, \PDO::PARAM_NULL);
+                $dbst->bindValue(':tarefa', $obj->descricao, \PDO::PARAM_STR);
+                $dbst->bindValue(':descricao', $obj->descricao, \PDO::PARAM_STR);
+                $dbst->bindValue(':area', $obj->area, \PDO::PARAM_INT);
+                $dbst->bindValue(':demanda_legal', $obj->demanda_legal, \PDO::PARAM_BOOL);
 
-            print_r($dbst->execute());
+                $dbst->execute();
+            } else {
+                echo 'Não é possivel cadastrar estes Prazos, pois devem estar entre a data atual e o último dia do ano corrente!';
+            }
         }
     }
 
@@ -243,7 +251,32 @@ class Database
         $this->execute($dbst);
     }
 
-    public function retornaDescArea($id){
+    public function checaTarefaExistenteComArea(AreaModel $obj)
+    {
+        $dbst = $this->db->prepare(" SELECT melhorias.id FROM Melhorias inner join Area on melhorias.area = area.id WHERE melhorias.area = :id");
+        $dbst->bindValue(':id', $obj->getAreaModelId(), \PDO::PARAM_INT);
+        return $this->execute($dbst);
+    }
+
+    public function checaDataPrazos(MelhoriaModel $obj) // retorna TRUE se estiver dentro do prazo de data atual!
+    {
+        $retorno = false;
+        $pa = $obj->getPrazo_acordado();
+        $pl = $obj->getPrazo_legal();
+        $dataAtual = date('Y-m-d');
+
+        if ($pa >= $dataAtual) { //a lógica é, atraves da var $retorno armazenar se a $pa esta dentro da data atual,se sim seta true
+            $retorno = true; //pode ou n ter sido informado a $pl, independente disto o pa tem q ser validado antes pois se estiver correto já fica como true!
+            if ($pl != "" && $pl < $dataAtual) { //checa a var $pl, se estiver declarada mas fora da data atual(anterior a data atual), ai seta false pro retorno
+                $retorno = false;
+            }
+        }
+
+        return $retorno;
+    }
+
+    public function retornaDescArea($id)
+    {
         $dbst = $this->db->prepare(" SELECT descricao FROM Area WHERE id = :id");
         $dbst->bindValue(':id', $id, \PDO::PARAM_INT);
         return $this->execute($dbst);

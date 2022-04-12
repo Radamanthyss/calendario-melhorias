@@ -23,6 +23,7 @@ if ($_GET["acao"] == "save") {
         $melhoria->setId($id);
     }
     $melhoria->setArea($area);
+    $melhoria->setTarefa($descricao);
     $melhoria->setDescricao($descricao);
     $melhoria->setPrazo_acordado($prazo_acordado);
     $melhoria->setPrazo_legal($prazo_legal);
@@ -31,7 +32,7 @@ if ($_GET["acao"] == "save") {
     $melhoria->setTendencia($tendencia);
 
     Melhoria::getInstance()->salvarAtualizarMelhoria($melhoria);
-    //header("location: ../index.php?path=tarefas");
+    header("location: ../index.php?path=tarefas");
 }
 
 if ($_GET["acao"] == "del" && $_GET['id'] > 0) {
