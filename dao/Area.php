@@ -3,7 +3,6 @@
 namespace DAO;
 
 require_once 'Database.php';
-require_once '../model/AreaModel.php';
 
 use MODEL\AreaModel;
 

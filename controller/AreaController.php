@@ -18,7 +18,7 @@ if (isset($_POST["descricao"])) {
 
 if (!$_GET["acao"] && $idF == 0) {
     $area = new AreaModel();
-    $area->setAreaModelDescricao($descricao);
+    $area->setDescricao($descricao);
     Area::getInstance()->salvarArea($area);
     header("location: ../index.php?path=areas");
 }
@@ -26,8 +26,8 @@ if (!$_GET["acao"] && $idF == 0) {
 if (!$_GET["acao"] && $idF != 0) {
     try {
         $area = new AreaModel();
-        $area->setAreaModelId($idF);
-        $area->setAreaModelDescricao($descricao);
+        $area->setId($idF);
+        $area->setDescricao($descricao);
         Area::getInstance()->atualizarArea($area);
         header("location: ../index.php?path=areas");
     } catch (PDOException $erro) {
@@ -38,7 +38,7 @@ if (!$_GET["acao"] && $idF != 0) {
 if ($_GET["acao"] == "del" && $_GET['id'] > 0) {
     try {
         $area = new AreaModel();
-        $area->setAreaModelId($_GET['id']);
+        $area->setId($_GET['id']);
         Area::getInstance()->removerArea($area);
         header("location: ../index.php?path=areas");
     } catch (PDOException $erro) {
